@@ -72,9 +72,11 @@ binOpR op = foldr1 (BinOp op)
 parseInfix :: String -> Maybe (String, Expr)
 parseInfix = parseSum
 
-parseSum :: String -> Maybe (String, Expr)
-parseSum str =
-    (binOp Plus <$>) <$> go str
+data Associativity = Rght | Lft deriving (Show, Eq)
+
+parseOp :: Associativity -> (String-> Maybe (String, Expr)) -> String -> Maybe (String, Expr)
+parseOp ass next str = let op = if ass == Rght then binOpR else binOp in
+    (op Plus <$>) <$> go str
   where
     go :: String -> Maybe (String, [Expr])
     go str =
@@ -91,43 +93,14 @@ parseSum str =
                 ((e:) <$>) <$> rest
               Nothing -> Just (t, [e])
 
+parseSum :: String -> Maybe (String, Expr)
+parseSum = parseOp Lft parseMult
+
 parseMult :: String -> Maybe (String, Expr)
-parseMult str =
-    (binOp Mult <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parsePow str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parseStar t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
+parseMult = parseOp Lft parseMult
 
 parsePow :: String -> Maybe (String, Expr)
-parsePow str =
-    (binOpR Pow <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parseDigit str <|> parseExprBr str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parseHat t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
+parsePow = parseOp Rght (\str -> parseDigit str <|> parseExprBr str)
 
 parseExprBr :: String -> Maybe (String, Expr)
 parseExprBr ('(' : t) =
