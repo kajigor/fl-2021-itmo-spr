@@ -97,8 +97,13 @@ parser inParsers opParser op =
         Pow -> binOpR
         _ -> binOp
 
+parsePow :: String -> Maybe (String, Expr)
 parsePow = parser [parseDigit, parseExprBr] parseHat Pow
+
+parseMul :: String -> Maybe (String, Expr)
 parseMul = parser [parsePow] parseStar Mult
+
+parseSum :: String -> Maybe (String, Expr)
 parseSum = parser [parseSum] parsePlus Plus
 
 parseExprBr :: String -> Maybe (String, Expr)
