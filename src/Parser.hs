@@ -1,6 +1,7 @@
 module Parser where
 
 import Control.Applicative ((<|>))
+import Data.Foldable (asum)
 import Data.Char (isDigit, digitToInt)
 import Text.Printf (printf)
 
@@ -22,6 +23,7 @@ data Expr = BinOp Operator Expr Expr
 eval :: Expr -> Int
 eval (BinOp Plus l r) = eval l + eval r
 eval (BinOp Mult l r) = eval l * eval r
+eval (BinOp Pow  l r) = eval l ^ eval r
 eval (Num x) = x
 
 data ParserType = Prefix | Infix deriving (Show)
@@ -39,7 +41,7 @@ parse pType str =
 --       | * Expr Expr
 --       | Digit
 parsePrefix :: String -> Maybe (String, Expr)
-parsePrefix (op : t) | op == '+' || op == '*' =
+parsePrefix (op : t) | op == '+' || op == '*' || op == '^' =
   case parsePrefix t of
     Just (t', l) ->
       case parsePrefix t' of
@@ -59,55 +61,45 @@ parsePrefix _ = Nothing
 --       = Слаг (+ Слаг) (+ Слаг) .. (+ Слаг)
 --       -> [Слаг] - fold ... -> BinOp Plus (BinOp Plus ...)...
 -- Слаг :: Множ * Множ * ... * Множ
--- Множ :: Цифра | ( Expr )
+-- Множ :: Степ ^ Степ ^ ... ^ Степ
+-- Степ :: Цифра | ( Expr )
 -- [1,2,3] -> (1+2)+3
 
 binOp :: Operator -> [Expr] -> Expr
 binOp op = foldl1 (BinOp op)
 
+binOpR :: Operator -> [Expr] -> Expr
+binOpR op = foldr1 (BinOp op)
+
 parseInfix :: String -> Maybe (String, Expr)
 parseInfix = parseSum
 
-parseSum :: String -> Maybe (String, Expr)
-parseSum str =
-    (binOp Plus <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parseMult str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parsePlus t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
+parser :: [String -> Maybe (String, Expr)] -> (String -> Maybe (String, b)) -> Operator -> String -> Maybe (String, Expr)
+parser inParsers opParser op =
+      fmap (assocOp op <$>) . go
+    where
+      go :: String -> Maybe (String, [Expr])
+      go str =
+        let first = asum (fmap ($ str) inParsers) in
+        case first of
+          Nothing -> Nothing
+          Just (t, e) ->
+            if null t
+            then Just ("", [e])
+            else
+              case opParser t of
+                Just (t', _) ->
+                  let rest = go t' in
+                  ((e:) <$>) <$> rest
+                Nothing -> Just (t, [e])
+      assocOp :: Operator -> [Expr] -> Expr
+      assocOp = case op of
+        Pow -> binOpR
+        _ -> binOp
 
-parseMult :: String -> Maybe (String, Expr)
-parseMult str =
-    (binOp Mult <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parseDigit str <|> parseExprBr str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parseStar t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
-
-parsePow :: String -> Maybe (String, Expr)
-parsePow str = undefined
+parsePow = parser [parseDigit, parseExprBr] parseHat Pow
+parseMul = parser [parsePow] parseStar Mult
+parseSum = parser [parseSum] parsePlus Plus
 
 parseExprBr :: String -> Maybe (String, Expr)
 parseExprBr ('(' : t) =
@@ -125,7 +117,8 @@ parseStar ('*' : t) = Just (t, Mult)
 parseStar _ = Nothing
 
 parseHat :: String -> Maybe (String, Operator)
-parseHat str = undefined
+parseHat ('^' : t) = Just (t, Pow)
+parseHat _ = Nothing
 
 parseDigit :: String -> Maybe (String, Expr)
 parseDigit (d : t) | isDigit d =
