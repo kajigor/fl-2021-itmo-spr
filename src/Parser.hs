@@ -104,7 +104,7 @@ parseMul :: String -> Maybe (String, Expr)
 parseMul = parser [parsePow] parseStar Mult
 
 parseSum :: String -> Maybe (String, Expr)
-parseSum = parser [parseSum] parsePlus Plus
+parseSum = parser [parseMul] parsePlus Plus
 
 parseExprBr :: String -> Maybe (String, Expr)
 parseExprBr ('(' : t) =
