@@ -22,6 +22,7 @@ data Expr = BinOp Operator Expr Expr
 eval :: Expr -> Int
 eval (BinOp Plus l r) = eval l + eval r
 eval (BinOp Mult l r) = eval l * eval r
+eval (BinOp Pow l r)  = eval l ^ eval r
 eval (Num x) = x
 
 data ParserType = Prefix | Infix deriving (Show)
@@ -53,6 +54,7 @@ parsePrefix _ = Nothing
 
 -- Expr :: Expr + Expr
 --       | Expr * Expr
+--       | Expr ^ Expr
 --       | Digit
 --       | ( Expr )
 
@@ -60,11 +62,15 @@ parsePrefix _ = Nothing
 --       = Слаг (+ Слаг) (+ Слаг) .. (+ Слаг)
 --       -> [Слаг] - fold ... -> BinOp Plus (BinOp Plus ...)...
 -- Слаг :: Множ * Множ * ... * Множ
--- Множ :: Цифра | ( Expr )
+-- Множ :: Опер ^ Опер ^ ... ^ Опер
+-- Опер :: Цифра | ( Expr )
 -- [1,2,3] -> (1+2)+3
 
 binOp :: Operator -> [Expr] -> Expr
 binOp op = foldl1 (BinOp op)
+
+binOpR :: Operator -> [Expr] -> Expr
+binOpR op = foldr1 (BinOp op)
 
 parseInfix :: String -> Maybe (String, Expr)
 parseInfix = parseSum
@@ -94,7 +100,7 @@ parseMult str =
   where
     go :: String -> Maybe (String, [Expr])
     go str =
-      let first = parseDigit str <|> parseExprBr str in
+      let first = parsePow str in
       case first of
         Nothing -> Nothing
         Just (t, e) ->
@@ -108,7 +114,23 @@ parseMult str =
               Nothing -> Just (t, [e])
 
 parsePow :: String -> Maybe (String, Expr)
-parsePow str = undefined
+parsePow str = 
+    (binOpR Pow <$>) <$> go str
+  where
+    go :: String -> Maybe (String, [Expr])
+    go str =
+      let first = parseDigit str <|> parseExprBr str in
+      case first of
+        Nothing -> Nothing
+        Just (t, e) ->
+          if null t
+          then Just ("", [e])
+          else
+            case parseHat t of
+              Just (t', _) ->
+                let rest = go t' in
+                ((e:) <$>) <$> rest
+              Nothing -> Just (t, [e])
 
 parseExprBr :: String -> Maybe (String, Expr)
 parseExprBr ('(' : t) =
@@ -126,7 +148,8 @@ parseStar ('*' : t) = Just (t, Mult)
 parseStar _ = Nothing
 
 parseHat :: String -> Maybe (String, Operator)
-parseHat str = undefined
+parseHat ('^' : t) = Just (t, Pow)
+parseHat _ = Nothing
 
 parseDigit :: String -> Maybe (String, Expr)
 parseDigit (d : t) | isDigit d =
