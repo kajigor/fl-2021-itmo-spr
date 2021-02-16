@@ -37,9 +37,10 @@ parse pType str =
 
 -- Expr :: + Expr Expr
 --       | * Expr Expr
+--       | ^ Expr Expr
 --       | Digit
 parsePrefix :: String -> Maybe (String, Expr)
-parsePrefix (op : t) | op == '+' || op == '*' =
+parsePrefix (op : t) | op == '+' || op == '*' || op == '^' =
   case parsePrefix t of
     Just (t', l) ->
       case parsePrefix t' of
