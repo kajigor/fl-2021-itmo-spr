@@ -1,4 +1,13 @@
-module Parser where
+module Parser (
+    Operator (..), 
+    Expr (..), 
+    ParserType (..), 
+    eval,
+    parse,
+    plus,
+    mult,
+    pow
+) where
 
 import Control.Applicative ((<|>))
 import Data.Char (isDigit, digitToInt)
@@ -36,11 +45,14 @@ parse pType str =
     go Prefix = parsePrefix
     go Infix  = parseInfix
 
+type Parser a = String -> Maybe (String, a)
+
 -- Expr :: + Expr Expr
 --       | * Expr Expr
 --       | ^ Expr Expr
 --       | Digit
-parsePrefix :: String -> Maybe (String, Expr)
+
+parsePrefix :: Parser Expr
 parsePrefix (op : t) | op == '+' || op == '*' || op == '^' =
   case parsePrefix t of
     Just (t', l) ->
@@ -66,92 +78,51 @@ parsePrefix _ = Nothing
 -- Опер :: Цифра | ( Expr )
 -- [1,2,3] -> (1+2)+3
 
-binOp :: Operator -> [Expr] -> Expr
-binOp op = foldl1 (BinOp op)
+data Associativity = L | R
 
-binOpR :: Operator -> [Expr] -> Expr
-binOpR op = foldr1 (BinOp op)
+binOp :: Operator -> Associativity -> [Expr] -> Expr
+binOp op L = foldl1 (BinOp op)
+binOp op R = foldr1 (BinOp op)
 
-parseInfix :: String -> Maybe (String, Expr)
+parseInfix :: Parser Expr
 parseInfix = parseSum
 
-parseSum :: String -> Maybe (String, Expr)
-parseSum str =
-    (binOp Plus <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parseMult str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parsePlus t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
+parseMany1 :: Parser Expr -> Char -> Parser [Expr]
+parseMany1 parseOne delimiter str = 
+  let first = parseOne str in
+  case first of
+    Nothing -> Nothing
+    Just (t, e) ->
+      if null t
+      then Just ("", [e])
+      else
+        case parseDelimiter delimiter t of
+          Just (t', _) ->
+            let rest = parseMany1 parseOne delimiter t' in
+            ((e:) <$>) <$> rest
+          Nothing -> Just (t, [e])
 
-parseMult :: String -> Maybe (String, Expr)
-parseMult str =
-    (binOp Mult <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parsePow str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parseStar t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
+parseSum :: Parser Expr
+parseSum str = (binOp Plus L <$>) <$> parseMany1 parseMult '+' str
 
-parsePow :: String -> Maybe (String, Expr)
-parsePow str = 
-    (binOpR Pow <$>) <$> go str
-  where
-    go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = parseDigit str <|> parseExprBr str in
-      case first of
-        Nothing -> Nothing
-        Just (t, e) ->
-          if null t
-          then Just ("", [e])
-          else
-            case parseHat t of
-              Just (t', _) ->
-                let rest = go t' in
-                ((e:) <$>) <$> rest
-              Nothing -> Just (t, [e])
+parseMult :: Parser Expr
+parseMult str = (binOp Mult L <$>) <$> parseMany1 parsePow '*' str
 
-parseExprBr :: String -> Maybe (String, Expr)
+parsePow :: Parser Expr
+parsePow str = (binOp Pow R <$>) <$> parseMany1 (\s -> parseDigit s <|> parseExprBr s) '^' str
+
+parseExprBr :: Parser Expr
 parseExprBr ('(' : t) =
   case parseSum t of
     Just ((')' : t'), e) -> Just (t', e)
     _ -> Nothing
 parseExprBr _ = Nothing
 
-parsePlus :: String -> Maybe (String, Operator)
-parsePlus ('+' : t) = Just (t, Plus)
-parsePlus _ = Nothing
+parseDelimiter :: Char -> Parser Operator
+parseDelimiter d (c : t) | c == d = Just (t, toOp c)
+parseDelimiter _ _ = Nothing
 
-parseStar :: String -> Maybe (String, Operator)
-parseStar ('*' : t) = Just (t, Mult)
-parseStar _ = Nothing
-
-parseHat :: String -> Maybe (String, Operator)
-parseHat ('^' : t) = Just (t, Pow)
-parseHat _ = Nothing
-
-parseDigit :: String -> Maybe (String, Expr)
+parseDigit :: Parser Expr
 parseDigit (d : t) | isDigit d =
   Just (t, Num (digitToInt d))
 parseDigit _ = Nothing
