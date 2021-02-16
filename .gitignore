@@ -1,3 +1,6 @@
 .stack-work/
 *~
 str.out
+.idea/
+fl2021-itmo-spr.iml
+dist-newstyle
