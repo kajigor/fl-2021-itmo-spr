@@ -99,24 +99,24 @@ parseSepBy item separator str =
 
 parseSum :: ParserOf Expr
 parseSum str =
-    binOp Plus <$$> go str
+    binOp Plus <$$> summands
   where
-    go :: String -> Maybe (String, [Expr])
-    go = parseSepBy parseMult (parseOp Plus)
+    summands :: Maybe (String, [Expr])
+    summands = parseSepBy parseMult (parseOp Plus) str
 
 parseMult :: ParserOf Expr
 parseMult str =
-    binOp Mult <$$> go str
+    binOp Mult <$$> multipliers
   where
-    go :: String -> Maybe (String, [Expr])
-    go = parseSepBy parsePow (parseOp Mult)
+    multipliers :: Maybe (String, [Expr])
+    multipliers = parseSepBy parsePow (parseOp Mult) str
 
 parsePow :: ParserOf Expr
 parsePow str =
-    foldr1 (BinOp Pow) <$$> go str
+    foldr1 (BinOp Pow) <$$> expTower
   where
-    go :: String -> Maybe (String, [Expr])
-    go str = parseSepBy (\str -> parseDigit str <|> parseExprBr str) (parseOp Pow) str
+    expTower :: Maybe (String, [Expr])
+    expTower = parseSepBy (\str -> parseDigit str <|> parseExprBr str) (parseOp Pow) str
 
 parseExprBr :: ParserOf Expr
 parseExprBr ('(' : t) =
