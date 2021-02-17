@@ -93,7 +93,7 @@ parseMult str =
   where
     go :: String -> Maybe (String, [Expr])
     go str =
-      let first = parseDigit str <|> parseExprBr str in
+      let first = parsePow str <|> parseDigit str <|> parseExprBr str in
       case first of
         Nothing -> Nothing
         Just (t, e) ->
@@ -107,7 +107,23 @@ parseMult str =
               Nothing -> Just (t, [e])
 
 parsePow :: String -> Maybe (String, Expr)
-parsePow str = undefined
+parsePow str =
+    (foldr1 (BinOp Pow) <$>) <$> go str
+  where
+    go :: String -> Maybe (String, [Expr])
+    go str =
+      let first = parseDigit str <|> parseExprBr str in
+      case first of
+          Nothing -> Nothing
+          Just (t, e) ->
+              if null t
+              then Just ("", [e])
+              else
+                case parseHat t of
+                  Just (t', _) ->
+                    let rest = go t' in
+                    ((e:) <$>) <$> rest
+                  Nothing -> Just (t, [e])
 
 parseExprBr :: String -> Maybe (String, Expr)
 parseExprBr ('(' : t) =
@@ -125,7 +141,8 @@ parseStar ('*' : t) = Just (t, Mult)
 parseStar _ = Nothing
 
 parseHat :: String -> Maybe (String, Operator)
-parseHat str = undefined
+parseHat ('^' : t) = Just (t, Pow)
+parseHat _ = Nothing
 
 parseDigit :: String -> Maybe (String, Expr)
 parseDigit (d : t) | isDigit d =
