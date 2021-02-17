@@ -40,10 +40,12 @@ parse pType str =
     go Prefix = parsePrefix
     go Infix  = parseInfix
 
+type ParserOf a = String -> Maybe (String, a)
+
 -- Expr :: + Expr Expr
 --       | * Expr Expr
 --       | Digit
-parsePrefix :: String -> Maybe (String, Expr)
+parsePrefix :: ParserOf Expr
 parsePrefix (op : t) | op == '+' || op == '*' || op == '^' =
   case parsePrefix t of
     Just (t', l) ->
@@ -76,10 +78,10 @@ fmap2 f x = (f <$>) <$> x
 binOp :: Operator -> [Expr] -> Expr
 binOp op = foldl1 (BinOp op)
 
-parseInfix :: String -> Maybe (String, Expr)
+parseInfix :: ParserOf Expr
 parseInfix = parseSum
 
-parseSepBy :: (String -> Maybe (String, a)) -> (String -> Maybe (String, b)) -> String -> Maybe (String, [a])
+parseSepBy :: ParserOf a -> ParserOf b -> ParserOf [a]
 parseSepBy item separator str = 
   let first = item str in
   case first of
@@ -95,28 +97,28 @@ parseSepBy item separator str =
           Nothing -> Just (t, [e])
 
 
-parseSum :: String -> Maybe (String, Expr)
+parseSum :: ParserOf Expr
 parseSum str =
     binOp Plus <$$> go str
   where
     go :: String -> Maybe (String, [Expr])
     go = parseSepBy parseMult (parseOp Plus)
 
-parseMult :: String -> Maybe (String, Expr)
+parseMult :: ParserOf Expr
 parseMult str =
     binOp Mult <$$> go str
   where
     go :: String -> Maybe (String, [Expr])
     go = parseSepBy parsePow (parseOp Mult)
 
-parsePow :: String -> Maybe (String, Expr)
+parsePow :: ParserOf Expr
 parsePow str =
     foldr1 (BinOp Pow) <$$> go str
   where
     go :: String -> Maybe (String, [Expr])
     go str = parseSepBy (\str -> parseDigit str <|> parseExprBr str) (parseOp Pow) str
 
-parseExprBr :: String -> Maybe (String, Expr)
+parseExprBr :: ParserOf Expr
 parseExprBr ('(' : t) =
   case parseSum t of
     Just (')' : t', e) -> Just (t', e)
@@ -133,7 +135,7 @@ parseOp :: Operator -> String -> Maybe (String, Operator)
 parseOp op s = const op <$$> parseChar (opChar op) s
 
 
-parseDigit :: String -> Maybe (String, Expr)
+parseDigit :: ParserOf Expr
 parseDigit (d : t) | isDigit d =
   Just (t, Num (digitToInt d))
 parseDigit _ = Nothing
