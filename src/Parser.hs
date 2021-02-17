@@ -93,7 +93,7 @@ parseMult str =
   where
     go :: String -> Maybe (String, [Expr])
     go str =
-      let first = parsePow str <|> parseDigit str <|> parseExprBr str in
+      let first = parsePow str in
       case first of
         Nothing -> Nothing
         Just (t, e) ->
