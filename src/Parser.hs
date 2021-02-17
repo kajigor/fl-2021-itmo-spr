@@ -15,6 +15,11 @@ toOp '*' = Mult
 toOp '^' = Pow
 toOp c = error $ printf "Unsupported operator: %c" c
 
+opChar :: Operator -> Char
+opChar Plus = '+'
+opChar Mult = '*'
+opChar Pow = '^'
+
 data Expr = BinOp Operator Expr Expr
           | Num Int
           deriving (Show, Eq)
@@ -87,7 +92,7 @@ parseSum str =
           if null t
           then Just ("", [e])
           else
-            case parsePlus t of
+            case parseOp Plus t of
               Just (t', _) ->
                 let rest = go t' in
                 (e:) <$$> rest
@@ -106,7 +111,7 @@ parseMult str =
           if null t
           then Just ("", [e])
           else
-            case parseStar t of
+            case parseOp Mult t of
               Just (t', _) ->
                 let rest = go t' in
                 (e:) <$$> rest
@@ -125,7 +130,7 @@ parsePow str =
               if null t
               then Just ("", [e])
               else
-                case parseHat t of
+                case parseOp Pow t of
                   Just (t', _) ->
                     let rest = go t' in
                     (e:) <$$> rest
@@ -144,14 +149,9 @@ parseChar c (x:xs)
     | c == x = Just (xs, c)
     | otherwise = Nothing
 
-parsePlus :: String -> Maybe (String, Operator)
-parsePlus s = const Plus <$$> parseChar '+' s
+parseOp :: Operator -> String -> Maybe (String, Operator)
+parseOp op s = const op <$$> parseChar (opChar op) s
 
-parseStar :: String -> Maybe (String, Operator)
-parseStar s = const Mult <$$> parseChar '*' s
-
-parseHat :: String -> Maybe (String, Operator)
-parseHat s = const Pow <$$> parseChar '^' s
 
 parseDigit :: String -> Maybe (String, Expr)
 parseDigit (d : t) | isDigit d =
