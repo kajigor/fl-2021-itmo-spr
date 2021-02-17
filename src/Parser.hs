@@ -83,19 +83,16 @@ parseInfix :: ParserOf Expr
 parseInfix = parseSum
 
 parseSepBy :: ParserOf a -> ParserOf b -> ParserOf [a]
-parseSepBy item separator str = 
-  let first = item str in
-  case first of
+parseSepBy item separator str =
+  case item str of
     Nothing -> Nothing
-    Just (t, e) ->
-      if null t
-      then Just ("", [e])
-      else
-        case separator t of
-          Just (t', _) ->
-            let rest = parseSepBy item separator t' in
-            (e:) <$$> rest
-          Nothing -> Just (t, [e])
+    Just ("", first) -> Just ("", [first])
+    Just (str', first) ->
+      case separator str' of
+        Nothing -> Just (str', [first])
+        Just (str'', _) ->
+          let rest = parseSepBy item separator str'' in
+          (first:) <$$> rest
 
 
 parseSum :: ParserOf Expr
