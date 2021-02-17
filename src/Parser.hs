@@ -40,7 +40,8 @@ parse pType str =
     go Prefix = parsePrefix
     go Infix  = parseInfix
 
-type ParserOf a = String -> Maybe (String, a)
+type ParseResult a = Maybe (String, a)
+type ParserOf a = String -> ParseResult a
 
 -- Expr :: + Expr Expr
 --       | * Expr Expr
@@ -101,21 +102,21 @@ parseSum :: ParserOf Expr
 parseSum str =
     binOp Plus <$$> summands
   where
-    summands :: Maybe (String, [Expr])
+    summands :: ParseResult [Expr]
     summands = parseSepBy parseMult (parseOp Plus) str
 
 parseMult :: ParserOf Expr
 parseMult str =
     binOp Mult <$$> multipliers
   where
-    multipliers :: Maybe (String, [Expr])
+    multipliers :: ParseResult [Expr]
     multipliers = parseSepBy parsePow (parseOp Mult) str
 
 parsePow :: ParserOf Expr
 parsePow str =
     foldr1 (BinOp Pow) <$$> expTower
   where
-    expTower :: Maybe (String, [Expr])
+    expTower :: ParseResult [Expr]
     expTower = parseSepBy (\str -> parseDigit str <|> parseExprBr str) (parseOp Pow) str
 
 parseExprBr :: ParserOf Expr
@@ -126,12 +127,12 @@ parseExprBr ('(' : t) =
 parseExprBr _ = Nothing
 
 
-parseChar :: Char -> String -> Maybe (String, Char)
+parseChar :: Char -> ParserOf Char
 parseChar c (x:xs)
     | c == x = Just (xs, c)
     | otherwise = Nothing
 
-parseOp :: Operator -> String -> Maybe (String, Operator)
+parseOp :: Operator -> ParserOf Operator
 parseOp op s = const op <$$> parseChar (opChar op) s
 
 
