@@ -1,5 +1,4 @@
 module Parser where
-import Data.Typeable
 import Control.Applicative ((<|>))
 import Data.Char (isDigit, digitToInt)
 import Text.Printf (printf)
