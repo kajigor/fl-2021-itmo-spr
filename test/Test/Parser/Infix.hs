@@ -40,6 +40,10 @@ unit_spaces = do
   parsingSuccess parse "1 + 2 * (3^4)"  (plus (Num 1) (mult (Num 2) (pow (Num 3) (Num 4))))
   parsingSuccess parse "1\t+2\n*(3^4)"  (plus (Num 1) (mult (Num 2) (pow (Num 3) (Num 4))))
 
+unit_numbers :: Assertion 
+unit_numbers = do
+  parsingSuccess parse "123+(456*789)" (plus (Num 123) (mult (Num 456) (Num 789)))
+  parsingSuccess parse "(23+12)^(24*2)" (pow (plus (Num 23) (Num 12)) (mult (Num 24) (Num 2)))
 
 
 
