@@ -72,12 +72,13 @@ binOpRight op = foldr1 (BinOp op)
 parseInfix :: String -> Maybe (String, Expr)
 parseInfix = parseSum
 
+parseOp :: String -> (t -> [Expr] -> b1) -> t -> (String -> Maybe (String, Expr)) -> (String -> Maybe (String, b2)) -> Maybe (String, b1)
 parseOp str binOp op nxt parseSymbol =
     (binOp op <$>) <$> go str
   where
     go :: String -> Maybe (String, [Expr])
-    go str =
-      let first = nxt str <|> parseDigit str in
+    go s =
+      let first = nxt s in
       case first of
         Nothing -> Nothing
         Just (t, e) ->
@@ -97,12 +98,12 @@ parseMult :: String -> Maybe (String, Expr)
 parseMult str = parseOp str binOpLeft Mult parsePow parseStar
 
 parsePow :: String -> Maybe (String, Expr)
-parsePow str = parseOp str binOpRight Pow parseExprBr parseHat
+parsePow str = parseOp str binOpRight Pow (\s -> parseExprBr s <|> parseDigit s)  parseHat
 
 parseExprBr :: String -> Maybe (String, Expr)
 parseExprBr ('(' : t) =
   case parseSum t of
-    Just ((')' : t'), e) -> Just (t', e)
+    Just (')' : t', e) -> Just (t', e)
     _ -> Nothing
 parseExprBr _ = Nothing
 
