@@ -4,10 +4,11 @@ import Parser.Common (parseOp, parseDigit, parserEof)
 import Control.Applicative ((<|>))
 import Data.Char (isDigit, digitToInt, isSpace)
 import Expr (Expr (..), Operator (..))
+import Lexer (Token (..), lexer)
 import Text.Printf (printf)
 
 parse :: String -> Maybe Expr
-parse = parserEof parseSum
+parse = parserEof parseInfix
 
 -- Expr :: Expr + Expr
 --       | Expr * Expr
@@ -29,13 +30,14 @@ binOp :: Associativity -> Operator -> [Expr] -> Expr
 binOp AssocL op = foldl1 (BinOp op)
 binOp AssocR op = foldr1 (BinOp op)
 
-parseBinOp :: Associativity -> Operator -> (String -> Maybe (String, b)) -> (String -> Maybe (String, Expr)) -> String -> Maybe (String, Expr)
-parseBinOp assoc op parseOp nextParser str =
-    (binOp assoc op <$>) <$> go str
+parseBinOp :: Associativity -> Operator -> ([Token] -> Maybe ([Token], b)) 
+  -> ([Token] -> Maybe ([Token], Expr)) -> [Token] -> Maybe ([Token], Expr)
+parseBinOp assoc op parseOp nextParser tokens =
+    (binOp assoc op <$>) <$> go tokens
   where
-    go :: String -> Maybe (String, [Expr])
-    go str = do
-      first@(t, e) <- nextParser str
+    go :: [Token] -> Maybe ([Token], [Expr])
+    go tokens = do
+      first@(t, e) <- nextParser tokens
       if null t
       then return (t, [e])
       else
@@ -47,20 +49,23 @@ parseBinOp assoc op parseOp nextParser str =
         <|>
         return (t, [e])
 
-parseSum :: String -> Maybe (String, Expr)
-parseSum = parseBinOp AssocL Plus (parseOp '+') parseMult
+parseSum :: [Token] -> Maybe ([Token], Expr)
+parseSum = parseBinOp AssocL Plus (parseOp $ Oper Plus) parseMult
 
-parseMult :: String -> Maybe (String, Expr)
-parseMult = parseBinOp AssocL Mult (parseOp '*') parsePow
+parseMult :: [Token] -> Maybe ([Token], Expr)
+parseMult = parseBinOp AssocL Mult (parseOp $ Oper Mult) parsePow
 
-parsePow :: String -> Maybe (String, Expr)
-parsePow = parseBinOp AssocR Pow (parseOp '^') (\str -> parseDigit str <|> parseExprBr str)
+parsePow :: [Token] -> Maybe ([Token], Expr)
+parsePow = parseBinOp AssocR Pow (parseOp $ Oper Pow) (\tokens -> parseDigit tokens <|> parseExprBr tokens)
 
-parseExprBr :: String -> Maybe (String, Expr)
-parseExprBr ('(' : t) =
+parseExprBr :: [Token] -> Maybe ([Token], Expr)
+parseExprBr (Lbr : t) =
   case parseSum t of
-    Just (')' : t', e) -> Just (t', e)
+    Just (Rbr : t', e) -> Just (t', e)
     _ -> Nothing
 parseExprBr _ = Nothing
 
-
+parseInfix :: String -> Maybe ([Token], Expr)
+parseInfix str = do
+    tokens <- lexer str
+    parseSum tokens

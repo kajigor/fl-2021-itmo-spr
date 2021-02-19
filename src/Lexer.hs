@@ -7,6 +7,7 @@ import Expr (Operator (..), toOp)
 
 -- "+77*    123 42" -lexer-> [Plus, Num 77, Mult, Num 123, Num 42]
 -- "+77*    123 42!" -lexer-> Oops
+-- "(1+2)*3+4" -lexer -> [Lbr,Number 1,Oper Plus,Number 2,Rbr,Oper Mult,Number 3,Oper Plus,Number 4]
 data Token = Oper Operator | Number Int | Lbr | Rbr
            deriving (Show, Eq)
 
@@ -23,4 +24,10 @@ lexer (h:t) | isDigit h = do
     accumulateNumber acc (d:t) | isDigit d = accumulateNumber (d:acc) t
     accumulateNumber acc t = return (t, reverse acc)
 lexer (h:t) | isSpace h = lexer t
+lexer ('(':t) = do
+    rest <- lexer t
+    return (Lbr : rest)
+lexer (')':t) = do
+    rest <- lexer t
+    return (Rbr : rest)
 lexer _ = Nothing
