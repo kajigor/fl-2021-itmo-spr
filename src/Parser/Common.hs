@@ -1,15 +1,16 @@
 module Parser.Common where
 
 import Data.Char (isDigit, digitToInt)
-import Expr (Operator (..), Expr (..), toOp)
+import Expr (Operator (..), Expr (..))
+import Lexer (Token (..))
 
-parseOp :: Char -> String -> Maybe (String, Operator)
-parseOp c (h : t) | c == h = Just (t, toOp c)
+parseOp :: Token -> [Token] -> Maybe ([Token], Operator)
+parseOp (Oper c) ((Oper h) : t) | c == h = Just (t, c)
 parseOp _ _ = Nothing
 
-parseDigit :: String -> Maybe (String, Expr)
-parseDigit (d : t) | isDigit d =
-  Just (t, Num (digitToInt d))
+parseDigit :: [Token] -> Maybe ([Token], Expr)
+parseDigit ((Number d) : t)  =
+  Just (t, Num d)
 parseDigit _ = Nothing
 
 parserEof :: MonadFail m => (t -> m ([a], b)) -> t -> m b

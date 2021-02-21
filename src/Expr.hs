@@ -7,12 +7,6 @@ data Operator = Plus
               | Pow
               deriving (Show, Eq)
 
-toOp :: Char -> Operator
-toOp '+' = Plus
-toOp '*' = Mult
-toOp '^' = Pow
-toOp c = error $ printf "Unsupported operator: %c" c
-
 data Expr = BinOp Operator Expr Expr
           | Num Int
           deriving (Show, Eq)

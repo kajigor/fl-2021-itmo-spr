@@ -3,7 +3,7 @@ module Lexer where
 import Control.Applicative ((<|>))
 import Data.Char (isDigit, digitToInt, isSpace)
 import Text.Printf (printf)
-import Expr (Operator (..), toOp)
+import Expr (Operator (..))
 
 -- "+77*    123 42" -lexer-> [Plus, Num 77, Mult, Num 123, Num 42]
 -- "+77*    123 42!" -lexer-> Oops
@@ -12,9 +12,21 @@ data Token = Oper Operator | Number Int | Lbr | Rbr
 
 lexer :: String -> Maybe [Token]
 lexer [] = Just []
-lexer (h:t) | h `elem` "+*^" = do
+lexer (h:t) | h == '+' = do
   rest <- lexer t
-  return (Oper (toOp h) : rest)
+  return (Oper Plus : rest)
+lexer (h:t) | h == '*' = do
+  rest <- lexer t
+  return (Oper Mult : rest)
+lexer (h:t) | h == '^' = do
+  rest <- lexer t
+  return (Oper Pow : rest)
+lexer (h:t) | h == '(' = do
+   rest <- lexer t
+   return (Lbr : rest)
+lexer (h:t) | h == ')' = do
+   rest <- lexer t
+   return (Rbr : rest)
 lexer (h:t) | isDigit h = do
     (t', number) <- accumulateNumber [h] t
     rest <- lexer t'
