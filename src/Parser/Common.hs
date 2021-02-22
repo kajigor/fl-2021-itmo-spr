@@ -2,6 +2,7 @@ module Parser.Common where
 
 import Data.Char (isDigit, digitToInt)
 import Expr (Operator (..), Expr (..), toOp)
+import Control.Monad.Fail
 
 parseOp :: Char -> String -> Maybe (String, Operator)
 parseOp c (h : t) | c == h = Just (t, toOp c)
