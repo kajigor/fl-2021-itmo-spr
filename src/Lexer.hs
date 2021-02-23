@@ -10,6 +10,12 @@ import Expr (Operator (..), toOp)
 data Token = Oper Operator | Number Int | Lbr | Rbr
            deriving (Show, Eq)
 
+braceToToken :: Char -> Token
+braceToToken s 
+  | s == ')' = Rbr
+  | s == '(' = Lbr
+  | otherwise = undefined 
+
 lexer :: String -> Maybe [Token]
 lexer [] = Just []
 lexer (h:t) | h `elem` "+*^" = do
@@ -22,5 +28,8 @@ lexer (h:t) | isDigit h = do
   where
     accumulateNumber acc (d:t) | isDigit d = accumulateNumber (d:acc) t
     accumulateNumber acc t = return (t, reverse acc)
+lexer (h:t) | h `elem` "()" = do
+  rest <- lexer t
+  return (braceToToken h : rest)
 lexer (h:t) | isSpace h = lexer t
 lexer _ = Nothing
