@@ -23,4 +23,11 @@ lexer (h:t) | isDigit h = do
     accumulateNumber acc (d:t) | isDigit d = accumulateNumber (d:acc) t
     accumulateNumber acc t = return (t, reverse acc)
 lexer (h:t) | isSpace h = lexer t
+lexer (h:t) | h `elem` "()" = do
+                  t' <- lexer t
+                  if h =='(' then
+                    return (Lbr: t')
+                  else 
+                    return (Rbr : t')
+                  
 lexer _ = Nothing

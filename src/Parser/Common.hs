@@ -2,9 +2,10 @@ module Parser.Common where
 
 import Data.Char (isDigit, digitToInt)
 import Expr (Operator (..), Expr (..), toOp)
+import Lexer (Token (..))
 
-parseOp :: Char -> String -> Maybe (String, Operator)
-parseOp c (h : t) | c == h = Just (t, toOp c)
+parseOp :: Token -> [Token] -> Maybe ([Token], Operator)
+parseOp (Oper op') ((Oper op) : t) | op' == op = Just (t, op')
 parseOp _ _ = Nothing
 
 parseDigit :: String -> Maybe (String, Expr)
