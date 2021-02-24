@@ -12,19 +12,19 @@ data Token = Oper Operator | Number Int | Lbr | Rbr
 
 lexer :: String -> Maybe [Token]
 lexer [] = Just []
-lexer (h:t) | h == '+' = do
+lexer ('+':t) = do
   rest <- lexer t
   return (Oper Plus : rest)
-lexer (h:t) | h == '*' = do
+lexer ('*':t) = do
   rest <- lexer t
   return (Oper Mult : rest)
-lexer (h:t) | h == '^' = do
+lexer ('^':t) = do
   rest <- lexer t
   return (Oper Pow : rest)
-lexer (h:t) | h == '(' = do
+lexer ('(':t) = do
    rest <- lexer t
    return (Lbr : rest)
-lexer (h:t) | h == ')' = do
+lexer (')':t) = do
    rest <- lexer t
    return (Rbr : rest)
 lexer (h:t) | isDigit h = do
