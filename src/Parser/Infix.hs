@@ -8,7 +8,9 @@ import Text.Printf (printf)
 import Lexer
 
 parse :: String -> Maybe Expr
-parse = parserEof parseSum
+parse s = do
+  tokenList <- lexer s
+  parserEof parseSum tokenList
 
 -- Expr :: Expr + Expr
 --       | Expr * Expr
@@ -42,11 +44,12 @@ parseBinOp assoc op nextParser tokenList =
       else
         ( do
           (Oper op' : t') <- Just t
-          if op' == op
-            then do
-            let rest = go t'
-            ((e:) <$>) <$> rest
-          else Nothing
+          if op == op' then
+            do
+              let rest = go t'
+              ((e:) <$>) <$> rest
+          else 
+            Nothing
         )
         <|>
         return (t, [e])
@@ -58,7 +61,11 @@ parseMult :: [Token] -> Maybe ([Token], Expr)
 parseMult = parseBinOp AssocL Mult parsePow
 
 parsePow :: [Token] -> Maybe ([Token], Expr)
-parsePow = parseBinOp AssocR Pow (\str -> parseNumber str <|> parseExprBr str)
+parsePow = parseBinOp AssocR Pow (\s -> parseDigitLexer s <|> parseExprBr s)
+
+parseDigitLexer :: [Token] -> Maybe ([Token], Expr)
+parseDigitLexer (Number num : tokenList) = Just (tokenList, Num num)
+parseDigitLexer _ = Nothing 
 
 parseExprBr :: [Token] -> Maybe ([Token], Expr)
 parseExprBr (Lbr : t) =
