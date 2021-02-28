@@ -38,10 +38,12 @@ parseExpr =
            , (mult <|> div', LeftAssoc)
            , (pow, RightAssoc)
            ]
-           ( whitespaces *> (
-               Num <$> number
-           <|> Ident <$> ident
-           <|> symbol '(' *> parseExpr <* symbol ')'
-             <* whitespaces )
+           ( whitespaces *> 
+             (
+                 Num <$> number
+             <|> Ident <$> ident
+             <|> symbol '(' *> parseExpr <* symbol ')'
+             ) 
+             <* whitespaces
            )
            BinOp
