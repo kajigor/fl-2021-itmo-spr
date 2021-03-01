@@ -4,6 +4,9 @@ module Parser.Combinators where
 import Control.Applicative ( Alternative(..) )
 import Text.Printf (printf)
 import Data.Char (isSpace)
+--import qualified Control.Monad.Fail as F   
+import Control.Monad.Fail   
+
 
 data Result input a = Success input a
                     | Failure String
@@ -68,7 +71,7 @@ satisfy pred = do
   x <- item
   if pred x
   then return x
-  else fail "Predicate failed"
+  else Control.Monad.Fail.fail "Predicate failed"
 
 sepBy :: Parser input sep -> Parser input elem -> Parser input [elem]
 sepBy sep elem = sepBy1 sep elem <|> return []
