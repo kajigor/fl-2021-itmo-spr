@@ -2,7 +2,7 @@ module Parser.Common where
 
 import Data.Char (isDigit, isAlpha)
 import Parser.Combinators ( Parser, satisfy )
-import Control.Applicative (some)
+import Control.Applicative (some, (<|>))
 
 digit :: Parser String Char
 digit = satisfy isDigit
@@ -29,4 +29,23 @@ uberExpr :: [(Parser i op, Associativity)]
          -> Parser i ast
          -> (op -> ast -> ast -> ast)
          -> Parser i ast
-uberExpr = undefined
+uberExpr ((p, assoc) : ps) parser func =
+  case assoc of
+    LeftAssoc -> do
+      tail <- parseTail
+      head <- some ((,) <$> p <*> parseTail)
+      return (helper True head tail)
+    RightAssoc -> do
+      tail <- parseTail
+      head <- some ((,) <$> p <*> parseTail)
+      return (helper False head tail)
+    NoAssoc -> flip func <$> parseTail <*> p <*> parseTail
+    <|> parseTail
+  where
+    helper boo (x@(f, s) : xs) tail
+      | boo = helper boo xs (func f tail s)
+      | not boo = func f tail (helper boo xs s)
+    helper _ [] tail = tail
+
+    parseTail = uberExpr ps parser func
+uberExpr [] parser func = parser
