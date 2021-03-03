@@ -2,7 +2,7 @@ module Parser.Common where
 
 import Data.Char (isDigit, isAlpha)
 import Parser.Combinators ( Parser, satisfy )
-import Control.Applicative (some)
+import Control.Applicative 
 
 digit :: Parser String Char
 digit = satisfy isDigit
@@ -29,4 +29,37 @@ uberExpr :: [(Parser i op, Associativity)]
          -> Parser i ast
          -> (op -> ast -> ast -> ast)
          -> Parser i ast
-uberExpr = undefined
+
+uberExpr ((parserOp, assoc):listParserOp) elementaryParser builderTree = case assoc of
+
+  NoAssoc -> ( do
+          ast1 <- nextParserOp
+          op' <- parserOp
+          builderTree op' ast1 <$> nextParserOp
+         ) <|>
+         nextParserOp 
+         where nextParserOp = uberExpr listParserOp elementaryParser builderTree 
+
+  LeftAssoc -> do 
+         (ops, elems) <- nextParser
+         let rest = foo flip (map builderTree ops) (tail elems)
+         return $ foldl (\ f r -> r f) (head elems) rest 
+         where nextParser = do
+                          let nextParserOp = uberExpr listParserOp elementaryParser builderTree
+                          t <- nextParserOp
+                          p <- many ( liftA2 (,) parserOp  nextParserOp)
+                          return (map fst p, t : map snd p)
+  RightAssoc -> do
+         (ops, elems) <- nextParser
+         let rest = foo ($) (map builderTree ops) (init elems)
+         return $ foldr ($)  (last elems) rest
+         where nextParser = do
+                          let nextParserOp = uberExpr listParserOp elementaryParser builderTree
+                          t <- nextParserOp
+                          p <- many ( liftA2 (,) parserOp nextParserOp)
+                          return (map fst p, t : map snd p)
+
+uberExpr [] elementaryParser _ = elementaryParser
+
+foo :: (a1 -> a2 -> a3) -> [a1] -> [a2] -> [a3]
+foo fs xs ys = getZipList $ fs <$> ZipList xs <*> ZipList ys
