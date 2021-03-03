@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Parser.Combinators where
 
-import Control.Applicative ( Alternative(..) )
+import Control.Applicative ( Alternative(..), liftA2 )
 import Text.Printf (printf)
 import Data.Char (isSpace)
 
@@ -78,6 +78,12 @@ sepBy1 sep elem = do
   h <- elem
   t <- many (sep *> elem)
   return (h : t)
+
+sepByWithInfo1 :: Parser input sep -> Parser input elem -> Parser input (sep,[elem])
+sepByWithInfo1 sep elem = do
+  h <- elem
+  t <- many (liftA2 (,) sep elem)
+  return (fst $ head t, h : map snd t)
 
 brackets :: Parser input lbr -> Parser input rbr -> Parser input a -> Parser input a
 brackets lbr rbr p = lbr *> p <* rbr
