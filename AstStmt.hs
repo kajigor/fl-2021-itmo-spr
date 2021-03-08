@@ -1,7 +1,6 @@
 module AstStmt where
 
 -- Имена переменных
-import Control.Monad (join)
 type Var = String
 
 data Operator = Pow   -- Возведение в степень
