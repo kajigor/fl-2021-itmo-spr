@@ -22,7 +22,15 @@ number = -?digit+
 
 basicExpr = ident | number | true | false
 
-binOp = 
+# У унарных операторов приоритет выше, чем у всех бинарных
+# Ассоциативности нет
+
+binOp = *,/,% (Left) # Операторы в порядке убывания приоритета
+      | +,- (Left)
+      | <,<=,>,=> (No associativity)
+      | ==, != (No associativity)
+      | && (Left)
+      | || (Left)
 
 expr = !?basicExpr
      | while (expr) blockExpr
