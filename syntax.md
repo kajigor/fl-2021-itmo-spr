@@ -32,6 +32,12 @@ The grammar below uses the following BNF-style conventions:
 
     | `>`  -- greater
 
+* PrefixOp:
+
+    | `-` -- unary minus
+
+    | `+` -- unary plus
+
 ## Literals
 * _NumLiteral_: sequence of digits matching `/[1-9]+[0-9]*/` regex
 
@@ -81,13 +87,13 @@ The grammar below uses the following BNF-style conventions:
 ## Expression
 * _Expression_:
 
-    | _VariableName_ -- identifier
+    | [_PrefixOp_]_VariableName_ -- identifier
 
-    | _NumLiteral_ --  number
+    | [_PrefixOp_]_NumLiteral_ --  number
 
     | _Expression_ [_Delimiter_] _InfixOp_ [_Delimiter_] _Expression_ --    binary operator expression
     
-    | _BraceExpression_
+    | [_PrefixOp_]_BraceExpression_
 
 * _BraceExpression_:
 

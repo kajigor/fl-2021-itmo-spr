@@ -79,4 +79,4 @@ printStmt stmt =
 printer :: Program -> String
 printer (Program stmt) = printStmt stmt
 
-test1 = Program $ Seq [Read "a", While (BinOp Le (Ident "a") (Num 100)) (Seq [Write (Ident "a"), Assign "a" (BinOp Minus (Ident "a") (Num 1))])]
+test1 = Program $ Seq [Read "a", While (BinOp Le (Ident "a") (Num (-100))) (Seq [Write (Ident "a"), Assign "a" (BinOp Minus (Ident "a") (Num 1))])]
