@@ -33,4 +33,33 @@ data Stmt = Ignore Expr               -- Инструкция, которая я
 data Program = Program Stmt -- Программа является инструкцией
 
 printer :: Program -> String
-printer = undefined
+printer (Program st) = printStmt st
+
+printStmt :: Stmt -> String
+printStmt (Ignore expr              ) = printExpr expr
+printStmt (If expr stmt else_branch ) = "if (" ++ printExpr expr ++ ") {" ++ printStmt stmt ++ "}" ++ maybe "" (\s -> " else { " ++ printStmt s ++ " }") else_branch
+printStmt (While expr stmt          ) = "while (" ++ printExpr expr ++ ") {" ++ printStmt stmt ++ "}"
+printStmt (Read var                 ) = "input(" ++ var ++ ");"
+printStmt (Write expr               ) = "print(" ++ printExpr expr ++ ");"
+printStmt (Assign var expr          ) = var ++ " = " ++ printExpr expr ++ ";"
+printStmt (Seq stmts                ) = foldr (\stmt str -> printStmt stmt ++ "; " ++ str) "" stmts
+
+
+
+printExpr :: Expr -> String
+printExpr (Ident var) = var
+printExpr (Num i) = show i
+printExpr (BinOp op lhs rhs) = "(" ++ printExpr lhs ++ printOp op ++ " " ++ printExpr rhs ++ ")"
+
+printOp :: Operator -> String
+printOp Pow   = "**"
+printOp Mult  = "*"
+printOp Div   = "//"
+printOp Plus  = "+"
+printOp Minus = "-"
+printOp Eq    = "=="
+printOp Neq   = "!="
+printOp Le    = "<="
+printOp Lt    = "<"
+printOp Ge    = ">="
+printOp Gt    = ">"
