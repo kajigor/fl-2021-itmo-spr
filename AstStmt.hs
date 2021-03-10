@@ -15,6 +15,19 @@ data Operator = Pow   -- Возведение в степень
               | Ge    -- Больше или равно
               | Gt    -- Больше
 
+instance Show Operator where
+    show Pow = "^"
+    show Mult = "*"
+    show Div = "/"
+    show Plus = "+"
+    show Minus = "-"
+    show Eq = "=="
+    show Neq = "!="
+    show Le = "<="
+    show Lt = "<"
+    show Ge = ">="
+    show Gt = ">"
+
 -- Выражения (expressions)
 data Expr = Ident Var                -- Идентификатор
           | Num Int                  -- Число
@@ -33,4 +46,8 @@ data Stmt = Ignore Expr               -- Инструкция, которая я
 data Program = Program Stmt -- Программа является инструкцией
 
 printer :: Program -> String
-printer = undefined
+printer (Program s) = printerStmt s
+
+printerStmt :: Stmt -> String
+
+printerExpr :: Expr -> String
