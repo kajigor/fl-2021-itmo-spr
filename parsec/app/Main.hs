@@ -1,6 +1,7 @@
 module Main where
 
 import Parser
+import LangParser.AstStmt ( Program )
 
 import Options.Applicative
 import System.FilePath ((<.>))
@@ -51,11 +52,11 @@ dumpToStdoutParer = flag False True
 
 parserTypeParser :: Parser ParserType
 parserTypeParser =
-    mega
+    langParser
   where
-    mega = flag' Mega
-      (  long "mega"
-      <> help "Use the megaparsec example parser"
+    langParser = flag' MyLangParser  
+      (  long "lang"
+      <> help "Use the parser for language from specification"
       )
 
 actionParser :: Parser Action
@@ -83,11 +84,16 @@ getOutput _ _ = return defaultOutFile
 
 defaultOutFile = "str.out"
 
+checkCondition :: Program -> ParserType -> String
+checkCondition ast pType = case parse pType (show ast) of 
+  Right b -> show (ast == b)
+  Left a -> "false"
+
 runParser :: ParserType -> String -> FilePath -> IO ()
 runParser pType s path =
   case parse pType s of
     Right expr ->
-      writeFile path (printf "Expr:\n%s\n" (show expr))
+      writeFile path (printf "Expr:\n%s\n-----------------------------------\nCondition: %s\n" (show expr) (checkCondition expr pType))
     Left err ->
       writeFile path err
 
