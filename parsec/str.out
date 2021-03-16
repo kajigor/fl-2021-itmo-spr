@@ -1,2 +1,0 @@
-Expr:
-Program [FunType "head" (Arrow (Base (Constr "List" [Param "a"])) (Base (Param "a"))),Decl "List" ["a"] [Constr "Nil" [],Constr "Cons" [Param "a",Constr "List" [Param "a"]]]]
