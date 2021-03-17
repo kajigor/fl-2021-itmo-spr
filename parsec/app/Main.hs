@@ -1,6 +1,6 @@
 module Main where
 
-import Parser
+import ParserProvider
 
 import Options.Applicative
 import System.FilePath ((<.>))

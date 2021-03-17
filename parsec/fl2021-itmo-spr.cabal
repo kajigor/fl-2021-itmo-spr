@@ -27,8 +27,10 @@ source-repository head
 
 library
   exposed-modules:
-      Megaparsec.Example
+      Common.Syntax
+      ParserProvider
       Parser
+      Printer
   other-modules:
       Paths_fl2021_itmo_spr
   hs-source-dirs:
@@ -43,6 +45,10 @@ library
 executable exe
   main-is: Main.hs
   other-modules:
+      Common.Syntax
+      ParserProvider
+      Parser
+      Printer
       Paths_fl2021_itmo_spr
   hs-source-dirs:
       app
@@ -60,6 +66,8 @@ test-suite fl2021-itmo-spr-test
   type: exitcode-stdio-1.0
   main-is: Test.hs
   other-modules:
+      Test.Printer
+      Test.Parser
       Paths_fl2021_itmo_spr
   hs-source-dirs:
       test
