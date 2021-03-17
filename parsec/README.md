@@ -25,24 +25,24 @@ statement = expr
           | read
           | write
           | assignment
-          | whitespace* statement whitespace*
+          | space* statement space*
           ;
 
-if = '?' whitespaces expr whitespaces '{' whitespaces program whitespaces '}'
-   | '?' whitespaces expr whitespaces '{' whitespaces program whitespaces '}' whitespaces ':' whitespaces '{' whitespaces program whitespaces '}'
+if = '?' spaces expr spaces '{' spaces program spaces '}'
+   | '?' spaces expr spaces '{' spaces program spaces '}' spaces ':' spaces '{' spaces program spaces '}'
    ;
 
-while = '@' whitespaces expr whitespaces '{' whitespaces statement whitespaces '}' ;
+while = '@' spaces expr spaces '{' spaces program spaces '}' ;
 
-read = '>>' whitespaces id ;
+read = '>>' spaces id ;
 
-write = '<<' whitespaces expr ;
+write = '<<' spaces expr ;
 
-assignment = id whitespaces '{' whitespaces expr whitespaces '}' ;
+assignment = id whitespaces '{' spaces expr spaces '}' ;
 
 expr = id 
      | number
-     | '(' whitespaces expr whitespaces ')'
+     | '(' spaces expr spaces ')'
      | expr whitespaces binop whitespaces expr
      ;
 
@@ -55,7 +55,10 @@ id = ( alpha | digit )* alpha ( alpha | digit )* ;
 
 binop = '^' | '*' | '%' | '+' | '-' | '~' | '!' | '<~' | '<' | '~>' | '>' ;
 
-whitespace = ' ' | '\t' | '\n' ;
+whitespace = ' ' | '\t' ;
 whitespaces = whitespace+;
+
+space = whitespace | '\n' ;
+spaces = space+ ;
 ```
 

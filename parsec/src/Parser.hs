@@ -1,7 +1,7 @@
 module Parser where
 
-import Megaparsec.Parser
-import AstStmt
+import qualified Megaparsec.Parser ( parse )
+import AstStmt ( Program )
 
 data ParserType = Mega deriving (Show)
 
