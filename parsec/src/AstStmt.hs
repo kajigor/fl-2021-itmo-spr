@@ -3,6 +3,7 @@ module AstStmt where
 -- Имена переменных
 type Var = String
 
+-- Операции
 data Operator = Pow   -- Возведение в степень
               | Mult  -- Умножение
               | Div   -- Деление (с остатком)
@@ -41,6 +42,21 @@ precedence Gt    = 5
 precedence Eq    = 4
 precedence Neq   = 4
 
+data Fixity = L | R | N
+
+fixity :: Operator -> Fixity
+fixity Pow   = R
+fixity Mult  = L
+fixity Div   = L
+fixity Plus  = L
+fixity Minus = L
+fixity Le    = N
+fixity Lt    = N
+fixity Ge    = N
+fixity Gt    = N
+fixity Eq    = N
+fixity Neq   = N
+
 -- Выражения (expressions)
 data Expr = Ident Var                -- Идентификатор
           | Num Int                  -- Число
@@ -51,11 +67,16 @@ instance Show Expr where
   showsPrec _ (Num num) = shows num
   showsPrec p (BinOp op lhs rhs) = 
     let prec = precedence op 
-    in showParen (p > prec) $ showsPrec prec lhs . 
-                              showChar ' ' .
-                              shows op . 
-                              showChar ' ' .
-                              showsPrec prec rhs
+        showParen' b p = if b 
+                         then showString "( " . 
+                              p . 
+                              showString " )"
+                         else p
+    in showParen' (p > prec) $ showsPrec prec lhs . 
+                               showChar ' ' .
+                               shows op . 
+                               showChar ' ' .
+                               showsPrec prec rhs
 
 -- Инструкции (statements)
 data Stmt = Ignore Expr               -- Инструкция, которая является выражением (подразумевается, что значение выражения игнорируется)
