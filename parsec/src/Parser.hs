@@ -136,21 +136,24 @@ stmtParser =
   whileParser   <|>
   curlyBr (Seq <$> many stmtParser)
 
-
 ifParser :: Parser Stmt
-ifParser = ( do 
+ifParser = try ifElseParse <|> ifWithoutElseParser
+
+ifWithoutElseParser :: Parser Stmt
+ifWithoutElseParser = do 
+    kword "if"
+    cond <- lexeme $ roundBr exprParser
+    thn <- lexeme stmtParser
+    return $ If cond thn Nothing
+
+ifElseParse :: Parser Stmt
+ifElseParse = do
     kword "if"
     cond <- lexeme $ roundBr exprParser
     thn <- lexeme stmtParser
     kword "else"
     els <- lexeme stmtParser
-    return (If cond thn $ Just els))
-    <|> 
-    (do
-        kword "if"
-        cond <- lexeme $ roundBr exprParser
-        thn <- lexeme stmtParser
-        return $ If cond thn Nothing)
+    return (If cond thn $ Just els)
     
 
 whileParser :: Parser Stmt

@@ -33,4 +33,4 @@ data Stmt = Ignore Expr               -- Инструкция, которая я
           deriving (Show, Eq)
 
 -- Абстрактное синтаксическое дерево программы
-newtype Program = Program Stmt deriving (Show, Eq) -- Программа является инструкцией
+data Program = Program Stmt deriving (Show, Eq) -- Программа является инструкцией

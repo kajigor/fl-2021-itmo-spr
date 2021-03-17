@@ -45,10 +45,6 @@ library
 executable exe
   main-is: Main.hs
   other-modules:
-      Common.Syntax
-      ParserProvider
-      Parser
-      Printer
       Paths_fl2021_itmo_spr
   hs-source-dirs:
       app
