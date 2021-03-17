@@ -1,4 +1,7 @@
-head :: List a -> a; 
-data List a = Nil | Cons a (List a);
-tail :: List a -> List a ;
-map :: (a -> b) -> List a -> List b ;
+123 
+>> a 
+>> b 
+x { a + b } 
+@ x { 
+    << x - a * b 
+} 
