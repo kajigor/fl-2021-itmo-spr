@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 483edb163faf0d46ed8cec2b4ed4fc4658059f56e32f28abd62fd64918661a98
+-- hash: cc64dc63a1fab7ec4f45aec0badbc9621f794a2cf1b2a96f9fa360786d80ad2e
 
 name:           fl2021-itmo-spr
 version:        0.1.0.0
@@ -27,6 +27,8 @@ source-repository head
 
 library
   exposed-modules:
+      LParser.AstStmt
+      LParser.LParser
       Megaparsec.Example
       Parser
   other-modules:
@@ -69,6 +71,8 @@ test-suite fl2021-itmo-spr-test
     , base >=4.7 && <5
     , fl2021-itmo-spr
     , hedgehog
+    , hspec
+    , hspec-megaparsec
     , megaparsec
     , parser-combinators
     , tasty
