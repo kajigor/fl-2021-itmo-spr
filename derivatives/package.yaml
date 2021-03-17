@@ -1,4 +1,4 @@
-name:                fl2021-itmo-spr
+name:                derivatives
 version:             0.1.0.0
 github:              "kajigor/fl-2021-itmo-spr"
 license:             BSD3
@@ -33,9 +33,17 @@ dependencies:
 library:
   source-dirs: src
 
+executables:
+  derivative-exe:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+    - derivatives
+    - criterion
+
 tests:
   test:
     main:                Test.hs
     source-dirs:         test
     dependencies:
-    - fl2021-itmo-spr
+    - derivatives
