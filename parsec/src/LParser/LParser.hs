@@ -6,6 +6,7 @@ import LParser.AstStmt
 import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
+import Data.Maybe
 
 type Parser = Parsec Void String
 
@@ -159,3 +160,6 @@ pSeq = Seq <$> many pStmt
 
 pProgram :: Parser Program 
 pProgram = Program <$> pSeq
+
+instance Read Program where
+  readsPrec _ s = [(fromJust $ parseMaybe pProgram s, "")]
