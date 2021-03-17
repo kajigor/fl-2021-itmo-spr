@@ -33,6 +33,14 @@ dependencies:
 library:
   source-dirs: src
 
+executables:
+  exe:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+    - fl2021-itmo-spr
+    - criterion
+
 tests:
   test:
     main:                Test.hs

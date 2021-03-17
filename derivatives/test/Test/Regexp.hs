@@ -1,7 +1,9 @@
 module Test.Regexp where
 
 import Test.HUnit (Assertion, assertBool)
-import Regexp (Regexp (..), match)
+import Regexp (Regexp (..))
+import qualified Match as M (match)
+import qualified MatchFast as F (match)
 
 
 a :: Regexp
@@ -27,15 +29,30 @@ r3 = Alt b (Seq c (Star (Alt a b)))
 
 unit_regexp :: Assertion
 unit_regexp = do
-  assertBool "a*a" (match r1 (replicate 50 'a'))
-  assertBool "a*a" (not $ match r1 (replicate 50 'a' ++ "b"))
+  assertBool "a*a" (M.match r1 (replicate 50 'a'))
+  assertBool "a*a" (not $ M.match r1 (replicate 50 'a' ++ "b"))
 
-  assertBool "(a|a)*" (match r2 (replicate 50 'a'))
-  assertBool "(a|a)*" (not $ match r2 (replicate 50 'a' ++ "b"))
+  assertBool "(a|a)*" (M.match r2 (replicate 50 'a'))
+  assertBool "(a|a)*" (not $ M.match r2 (replicate 50 'a' ++ "b"))
 
-  assertBool "b|c(a|b)*" (match r3 "b")
-  assertBool "b|c(a|b)*" (match r3 "c")
-  assertBool "b|c(a|b)*" (match r3 "cabba")
-  assertBool "b|c(a|b)*" (not $ match r3 "d")
-  assertBool "b|c(a|b)*" (not $ match r3 "ba")
-  assertBool "b|c(a|b)*" (not $ match r3 "aaaa")
+  assertBool "b|c(a|b)*" (M.match r3 "b")
+  assertBool "b|c(a|b)*" (M.match r3 "c")
+  assertBool "b|c(a|b)*" (M.match r3 "cabba")
+  assertBool "b|c(a|b)*" (not $ M.match r3 "d")
+  assertBool "b|c(a|b)*" (not $ M.match r3 "ba")
+  assertBool "b|c(a|b)*" (not $ M.match r3 "aaaa")
+
+unit_regexp_fast :: Assertion
+unit_regexp_fast = do
+  assertBool "a*a" (F.match r1 (replicate 50 'a'))
+  assertBool "a*a" (not $ F.match r1 (replicate 50 'a' ++ "b"))
+
+  assertBool "(a|a)*" (F.match r2 (replicate 50 'a'))
+  assertBool "(a|a)*" (not $ F.match r2 (replicate 50 'a' ++ "b"))
+
+  assertBool "b|c(a|b)*" (F.match r3 "b")
+  assertBool "b|c(a|b)*" (F.match r3 "c")
+  assertBool "b|c(a|b)*" (F.match r3 "cabba")
+  assertBool "b|c(a|b)*" (not $ F.match r3 "d")
+  assertBool "b|c(a|b)*" (not $ F.match r3 "ba")
+  assertBool "b|c(a|b)*" (not $ F.match r3 "aaaa")
