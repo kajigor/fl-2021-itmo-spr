@@ -1,5 +1,4 @@
 module Test.Regexp where
-
 import Test.HUnit (Assertion, assertBool)
 import Regexp (Regexp (..), match)
 
@@ -39,3 +38,32 @@ unit_regexp = do
   assertBool "b|c(a|b)*" (not $ match r3 "d")
   assertBool "b|c(a|b)*" (not $ match r3 "ba")
   assertBool "b|c(a|b)*" (not $ match r3 "aaaa")
+
+
+unit_optimized :: Assertion
+unit_optimized = do
+  assertBool "a*a" (optMatch r1 (replicate 50 'a'))
+  assertBool "a*a" (not $ optMatch r1 (replicate 50 'a' ++ "b"))
+
+  assertBool "(a|a)*" (optMatch r2 (replicate 50 'a'))
+  assertBool "(a|a)*" (not $ optMatch r2 (replicate 50 'a' ++ "b"))
+
+  assertBool "b|c(a|b)*" (optMatch r3 "b")
+  assertBool "b|c(a|b)*" (optMatch r3 "c")
+  assertBool "b|c(a|b)*" (optMatch r3 "cabba")
+  assertBool "b|c(a|b)*" (not $ optMatch r3 "d")
+  assertBool "b|c(a|b)*" (not $ optMatch r3 "ba")
+  assertBool "b|c(a|b)*" (not $ optMatch r3 "aaaa")
+
+testPerformance = do
+  start <- getCurrentTime
+  let () = rnf (match r3 (replicate 10000 'b'))
+  end   <- getCurrentTime
+  return $ diffUTCTime end start
+
+testPerformanceOptimized = do
+  start <- getCurrentTime
+  let () = rnf (optMatch r3 (replicate 10000 'b'))
+  end   <- getCurrentTime
+  return $ diffUTCTime end start
+

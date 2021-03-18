@@ -30,3 +30,20 @@ derivative c (Alt p q) = Alt (derivative c p) (derivative c q)
 derivative c (Seq p q) | nullable p = Alt (Seq (derivative c p) q) (derivative c q)
 derivative c (Seq p q) = Seq (derivative c p) q
 derivative c (Star r) = Seq (derivative c r) (Star r)
+
+optDeriv :: Char -> Regexp -> Regexp
+optDeriv _ Empty = Empty
+optDeriv _ Epsilon = Empty
+optDeriv c (Char r) | c == r = Epsilon
+optDeriv c (Char r) = Empty
+optDeriv c (Alt p Empty) = derivative c p
+optDeriv c (Alt Empty q) = derivative c q
+optDeriv c (Alt p q) | p == q = derivative c p
+optDeriv c (Alt p q) = Alt (derivative c p) (derivative c q)
+optDeriv c (Seq p q) | nullable p = Alt (Seq (optDeriv c p) q) (optDeriv c q)
+optDeriv c (Seq p q) = if p == Empty || q == Empty then Empty else Seq (optDeriv c p) q
+optDeriv c (Star r) = Seq (optDeriv c r) (Star r)
+
+
+optMatch :: Regexp -> String -> Bool
+optMatch r s = nullable (foldl (flip optDeriv) r s)

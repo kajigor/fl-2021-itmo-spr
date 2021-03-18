@@ -4,18 +4,17 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 55e13104c16a85ed4b5d38b6c0705ce377b0e67f7328fd7da990aa821f00d18f
+-- hash: 8134db4f795a93602aa65c95d2a3efd64ce3b3b4039a2d8a75f36f719909d7cc
 
 name:           fl2021-itmo-spr
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://https://github.com/kajigor/fl-2021-itmo-spr>
-homepage:       https://github.com/kajigor/fl-2021-itmo-spr#readme
-bug-reports:    https://github.com/kajigor/fl-2021-itmo-spr/issues
+description:    Please see the README on GitHub at <https://github.com/kajigor/fl2021-itmo-spr#readme>
+homepage:       https://github.com/kajigor/fl2021-itmo-spr#readme
+bug-reports:    https://github.com/kajigor/fl2021-itmo-spr/issues
 author:         Ekaterina Verbitskaia
 maintainer:     kajigor@gmail.com
-copyright:      2020 Ekaterina Verbitskaia
+copyright:      2021 Ekaterina Verbitskaia
 license:        BSD3
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
@@ -23,25 +22,24 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/kajigor/fl-2021-itmo-spr
+  location: https://github.com/kajigor/fl2021-itmo-spr
 
 library
   exposed-modules:
-      Regexp
+      AstStmt
+      Expr
+      LParser
+      Parser
+      Parser.Combinators
+      Parser.Common
+      Parser.Infix
   other-modules:
       Paths_fl2021_itmo_spr
   hs-source-dirs:
       src
+  ghc-options: -fwarn-unused-imports
   build-depends:
-      HUnit
-    , base >=4.7 && <5
-    , containers
-    , hedgehog
-    , pretty-show
-    , tasty
-    , tasty-discover
-    , tasty-hedgehog
-    , tasty-hunit
+      base >=4.7 && <5
   default-language: Haskell2010
 
 executable exe
@@ -50,41 +48,34 @@ executable exe
       Paths_fl2021_itmo_spr
   hs-source-dirs:
       app
+  ghc-options: -fwarn-unused-imports -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
-    , containers
+    , filepath
     , fl2021-itmo-spr
-    , hedgehog
-    , pretty-show
-    , tasty
-    , tasty-discover
-    , tasty-hedgehog
-    , tasty-hunit
-    , deepseq
-    , time
-    , criterion
+    , optparse-applicative
   default-language: Haskell2010
 
-test-suite test
+test-suite fl2021-itmo-spr-test
   type: exitcode-stdio-1.0
   main-is: Test.hs
   other-modules:
-      Test.Regexp
-      Test.RegTest
+      Test.Common
+      Test.Expr
+      Test.Parser.Common
+      Test.Parser.Infix
+      Test.Parser.LTest
       Paths_fl2021_itmo_spr
   hs-source-dirs:
       test
+  ghc-options: -fwarn-unused-imports -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HUnit
     , base >=4.7 && <5
-    , containers
     , fl2021-itmo-spr
     , hedgehog
-    , pretty-show
     , tasty
     , tasty-discover
     , tasty-hedgehog
     , tasty-hunit
-    , deepseq
-    , time
   default-language: Haskell2010
