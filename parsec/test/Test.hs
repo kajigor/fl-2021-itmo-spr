@@ -49,6 +49,8 @@ main = hspec $
 	    parse progParser "" "if (x >= 10) begin x = 420; end else begin x = x -100; end" `shouldParse` Program (Seq [ifElseStmt])
       it "correct statement while" $
 	    parse progParser "" "while (1) begin << x; end" `shouldParse` Program (Seq [whileStmt])
+      it "correct comment" $
+	    parse progParser "" "while (1) begin << x; end // >> x;" `shouldParse` Program (Seq [whileStmt])
     describe "Error" $ do
       it "incorrect code: no ;" $
         parse progParser "" `shouldFailOn` "a=1"
