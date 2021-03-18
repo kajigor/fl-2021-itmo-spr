@@ -1,9 +1,10 @@
 module Parser where
 
-import Megaparsec.Example
+import LParser
+import AstStmt (Program)
 
-data ParserType = Mega deriving (Show)
+data ParserType = L deriving (Show)
 
 parse :: ParserType -> String -> Either String Program
-parse Mega = Megaparsec.Example.parse
+parse L = LParser.parse
 

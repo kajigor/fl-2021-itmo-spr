@@ -1,7 +1,6 @@
 module Main where
 
 import Parser
-import AstStmt
 
 import Options.Applicative
 import System.FilePath ((<.>))
@@ -52,11 +51,11 @@ dumpToStdoutParer = flag False True
 
 parserTypeParser :: Parser ParserType
 parserTypeParser =
-    lParser
+    lparser
   where
-    mega = flag' LParser
+    lparser = flag' L
       (  long "lparser"
-      <> help "Use the language L parser"
+      <> help "Use the parser for L language"
       )
 
 actionParser :: Parser Action

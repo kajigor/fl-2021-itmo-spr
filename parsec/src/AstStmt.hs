@@ -14,6 +14,7 @@ data Operator = Pow   -- Возведение в степень
               | Lt    -- Меньше
               | Ge    -- Больше или равно
               | Gt    -- Больше
+  deriving (Eq)
 
 instance Show Operator where
     show Pow = "^"
@@ -32,6 +33,7 @@ instance Show Operator where
 data Expr = Ident Var                -- Идентификатор
           | Num Int                  -- Число
           | BinOp Operator Expr Expr -- Выражение с бинарным оператором
+  deriving (Eq)
 
 instance Show Expr where
     show (Ident var) = var
@@ -46,6 +48,7 @@ data Stmt = Ignore Expr               -- Инструкция, которая я
           | Write Expr                -- Напечатать значение выражения
           | Assign Var Expr           -- Присвоить значение выражения переменной
           | Seq [Stmt]                -- Последовательность инструкций
+  deriving (Eq)
 
 instance Show Stmt where
   show (Ignore expr) = show expr ++ ";\n"
@@ -64,6 +67,10 @@ instance Show Stmt where
 
 -- Абстрактное синтаксическое дерево программы
 data Program = Program Stmt -- Программа является инструкцией
+  deriving (Eq)
+
+instance Show Program where
+    show (Program prog) = show prog
 
 printer :: Program -> String
-printer (Program s) = show s
+printer = show
