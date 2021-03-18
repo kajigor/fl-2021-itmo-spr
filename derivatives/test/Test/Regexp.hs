@@ -1,7 +1,7 @@
 module Test.Regexp where
 
 import Test.HUnit (Assertion, assertBool)
-import Regexp (Regexp (..), match)
+import Regexp (Regexp (..), match, match')
 
 
 a :: Regexp
@@ -39,3 +39,18 @@ unit_regexp = do
   assertBool "b|c(a|b)*" (not $ match r3 "d")
   assertBool "b|c(a|b)*" (not $ match r3 "ba")
   assertBool "b|c(a|b)*" (not $ match r3 "aaaa")
+
+unit_regexp_optimized :: Assertion
+unit_regexp_optimized = do
+  assertBool "a*a" (match' r1 (replicate 50 'a'))
+  assertBool "a*a" (not $ match' r1 (replicate 50 'a' ++ "b"))
+
+  assertBool "(a|a)*" (match' r2 (replicate 50 'a'))
+  assertBool "(a|a)*" (not $ match' r2 (replicate 50 'a' ++ "b"))
+
+  assertBool "b|c(a|b)*" (match' r3 "b")
+  assertBool "b|c(a|b)*" (match' r3 "c")
+  assertBool "b|c(a|b)*" (match' r3 "cabba")
+  assertBool "b|c(a|b)*" (not $ match' r3 "d")
+  assertBool "b|c(a|b)*" (not $ match' r3 "ba")
+  assertBool "b|c(a|b)*" (not $ match' r3 "aaaa")

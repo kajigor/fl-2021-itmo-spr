@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 486e4a0cade05a8f0b82cf9fa5ead501c74aeadfed8feaab1eeffbbc92e5ddfd
+-- hash: 549400028632721d161bfcf5d26c962bf0e79b30927a7f63f47ba201db2bdfd7
 
 name:           fl2021-itmo-spr
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Main
       Regexp
   other-modules:
       Paths_fl2021_itmo_spr
@@ -36,6 +37,7 @@ library
       HUnit
     , base >=4.7 && <5
     , containers
+    , criterion
     , hedgehog
     , pretty-show
     , tasty
@@ -56,6 +58,25 @@ test-suite test
       HUnit
     , base >=4.7 && <5
     , containers
+    , criterion
+    , fl2021-itmo-spr
+    , hedgehog
+    , pretty-show
+    , tasty
+    , tasty-discover
+    , tasty-hedgehog
+    , tasty-hunit
+  default-language: Haskell2010
+
+benchmark mainbench
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   src
+  main-is:          Main.hs
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , containers
+    , criterion
     , fl2021-itmo-spr
     , hedgehog
     , pretty-show

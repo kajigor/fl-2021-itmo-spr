@@ -29,6 +29,7 @@ dependencies:
 - tasty-discover
 - pretty-show
 - containers
+- criterion
 
 library:
   source-dirs: src
