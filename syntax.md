@@ -32,14 +32,8 @@ The grammar below uses the following BNF-style conventions:
 
     | `>`  -- greater
 
-* PrefixOp:
-
-    | `-` -- unary minus
-
-    | `+` -- unary plus
-
 ## Literals
-* _NumLiteral_: sequence of digits matching `/[1-9]+[0-9]*/` regex
+* _NumLiteral_: sequence of digits matching `/(+|-)?[1-9]+[0-9]*/` regex
 
 ## Keywords
 * _Keyword_:
@@ -68,9 +62,6 @@ The grammar below uses the following BNF-style conventions:
 
 * _Write_: `write`
 
-* _Ignore_: `;`
-
-
 ## Identifier
 
 * _VariableName_: sequence of characters matching `/[a-zA-Z_]+[a-zA-Z0-9_]*/` regex but not a _Keyword_
@@ -87,13 +78,13 @@ The grammar below uses the following BNF-style conventions:
 ## Expression
 * _Expression_:
 
-    | [_PrefixOp_]_VariableName_ -- identifier
+    | _VariableName_ -- identifier
 
-    | [_PrefixOp_]_NumLiteral_ --  number
+    | _NumLiteral_ --  number
 
     | _Expression_ [_Delimiter_] _InfixOp_ [_Delimiter_] _Expression_ --    binary operator expression
     
-    | [_PrefixOp_]_BraceExpression_
+    | _BraceExpression_
 
 * _BraceExpression_:
 
@@ -102,17 +93,17 @@ The grammar below uses the following BNF-style conventions:
 ## Statements
 * _Statement_:
     
-    | _Expression_ _Ignore_ -- instruction that is an expression
+    | _Expression_ `;` -- instruction that is an expression
     
-    | _If_ [_Delimiter_] _BraceExpression_ [_Delimiter_] _Statement_ [_Delimiter_] [_Else_ _Statement_] -- conditional expression. The first operand is the condition, the second is a true branch, the third is an optional false branch
+    | _If_ [_Delimiter_] _BraceExpression_ [_Delimiter_] _Statement_ [_Delimiter_] [_Else_ [_Delimiter_] _Statement_] -- conditional expression. The first operand is the condition, the second is a true branch, the third is an optional false branch
     
-    | _While_ [_Delimiter_] _BraceExpression_ [_Delimiter_]         _Statement_ -- loop with condition. _BraceExpression_ is a condition
+    | _While_ [_Delimiter_] _BraceExpression_ [_Delimiter_] _Statement_ -- loop with condition. _BraceExpression_ is a condition
     
-    | _Read_ _Delimiter_ _VariableName_ -- read value into variable
+    | _Read_ _Delimiter_ _VariableName_ `;` -- read value into variable
     
-    | _Write_ _Delimiter_ _Expression_ -- print expression value
+    | _Write_ _Delimiter_ _Expression_ `;` -- print expression value
     
-    | _VariableName_ [_Delimiter_] _Assign_ [_Delimiter_]   _Expression_            -- assign value to variable
+    | _VariableName_ [_Delimiter_] _Assign_ [_Delimiter_]   _Expression_ `;` -- assign value to variable
 
     | _Seq_
     
