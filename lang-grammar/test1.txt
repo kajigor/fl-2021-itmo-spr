@@ -1,0 +1,1 @@
+{read a; while (a <= -100) {write a; a = a - 1; } }
